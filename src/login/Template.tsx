@@ -7,6 +7,7 @@ import type { I18n } from "./i18n";
 import type { KcContext } from "./KcContext";
 import "@digitallabs/one-x-ui/styles.css";
 import "../styles/tailwind.css";
+import hdfcInspireLogo from "../asserts/images/HDFCLife_Inspire_Logo.svg";
 
 export default function Template(props: TemplateProps<KcContext, I18n>) {
     const { documentTitle, bodyClassName, kcContext, i18n, doUseDefaultCss, classes, children } = props;
@@ -38,11 +39,9 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
     return (
         <div className="bg-[#F0F6FE]">
             <div className="pt-[80px] pl-[80px]">
-                <img className="w-[174.32px]" src="HDFCLife_Inspire_Logo.svg" alt="HDFCLife Inspire Logo" />
+                <img className="w-[174.32px]" src={hdfcInspireLogo} alt="HDFCLife Inspire Logo" />
             </div>
-            <div className="flex items-center justify-center min-h-screen ">
-                <div className="bg-white p-8 rounded-lg shadow-lg">{children}</div>
-            </div>
+            <div className="flex items-center justify-center min-h-screen ">{children}</div>
         </div>
     );
 }
