@@ -5,8 +5,9 @@ import { getKcClsx } from "keycloakify/login/lib/kcClsx";
 import type { KcContext } from "../KcContext";
 import type { I18n } from "../i18n";
 import axios from "axios";
-import { Button, DisplayText, Text, colors } from "@digitallabs/one-x-ui";
+import { Button, DisplayText, Heading, Text, colors } from "@digitallabs/one-x-ui";
 import { ArrowLeft } from "@phosphor-icons/react";
+import productLogoHdfcLife from "../../asserts/images/Product_Logo_HDFC_Life.svg";
 
 const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18n>> = ({ kcContext, i18n, doUseDefaultCss, Template, classes }) => {
     const { kcClsx } = getKcClsx({
@@ -37,202 +38,236 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
 
     return (
         <Template kcContext={kcContext} i18n={i18n} doUseDefaultCss={doUseDefaultCss} classes={classes} headerNode="Login">
-            <div className={`bg-[${colors.neutral.white}] rounded-2xl shadow-[0px_20px_32px_0px_#6061701f]`}>
-                <div className="flex p-4 items-center gap-1">
+            <div className={`bg-[${colors.neutral.white}] rounded-2xl shadow-[0px_20px_32px_0px_#6061701f] gap-8`}>
+                <div className="absolute flex p-8 items-center gap-1">
                     <ArrowLeft size={20} color={colors.primary.blue[500]} />
                     <Text size="md" fontWeight="medium" style={{ color: colors.primary.blue[500] }}>
                         Back
                     </Text>
+                    {/* <Button
+                                            className="rounded-full p-3"
+                                            variant="primary"
+                                            color="primary"
+                                            onClick={() => setPhoneActivated(true)}
+                                        >
+                                            Mobile number
+                                        </Button> */}
                 </div>
-                <div className="py-[136] ">
-                    <div className="bg-[#FEF2F1] rounded-full">
-                        <Button
-                            className="rounded-full p-3"
-                            // variant={phoneActivated ? "primary" : "link"}
-                            // color={phoneActivated ? "primary" : "gray"}
-                            onClick={() => setPhoneActivated(true)}
-                        >
-                            Mobile number
-                        </Button>
-                        <Button
-                            className="rounded-full p-3"
-                            // variant={!phoneActivated ? "primary" : "link"}
-                            // color={!phoneActivated ? "primary" : "gray"}
-                            onClick={() => setPhoneActivated(false)}
-                        >
-                            Username
-                        </Button>
+                <div className="py-[80px] px-[136px]">
+                    <div className="gap-5 flex flex-col items-center">
+                        <div>
+                            <img src={productLogoHdfcLife} alt="productLogoHdfcLife" />
+                        </div>
+                        <Heading as="h3" fontWeight="semibold">
+                            Login using
+                        </Heading>
                     </div>
-                    <div id="kc-form">
-                        <div id="kc-form-wrapper">
-                            {realm.password && (
-                                <form
-                                    id="kc-form-login"
-                                    onSubmit={() => {
-                                        setIsLoginButtonDisabled(true);
-                                        return true;
-                                    }}
-                                    action={url.loginAction}
-                                    method="post"
-                                >
-                                    <input type="hidden" id="phoneActivated" name="phoneActivated" value={phoneActivated.toString()} />
+                    <div className="gap-6 flex flex-col">
+                        <div className="flex justify-center">
+                            <div className="bg-[#FEF2F1] rounded-full max-w-fit">
+                                {phoneActivated ? (
+                                    <>
+                                        <Button
+                                            className="rounded-full p-3"
+                                            variant="primary"
+                                            color="primary"
+                                            onClick={() => setPhoneActivated(true)}
+                                        >
+                                            Mobile number
+                                        </Button>
+                                        <Button className="rounded-full p-3" variant="link" color="gray" onClick={() => setPhoneActivated(false)}>
+                                            Username
+                                        </Button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Button className="rounded-full p-3" variant="link" color="gray" onClick={() => setPhoneActivated(true)}>
+                                            Mobile number
+                                        </Button>
+                                        <Button
+                                            className="rounded-full p-3"
+                                            variant="primary"
+                                            color="primary"
+                                            onClick={() => setPhoneActivated(false)}
+                                        >
+                                            Username
+                                        </Button>
+                                    </>
+                                )}
+                            </div>
+                        </div>
 
-                                    {phoneActivated ? (
-                                        <div>
-                                            <div className={kcClsx("kcFormGroupClass")}>
-                                                <label htmlFor="phoneNumber" className={kcClsx("kcLabelClass")}>
-                                                    <DisplayText fontWeight="regular">Mobile number</DisplayText>
-                                                </label>
-                                                <input
-                                                    tabIndex={0}
-                                                    type="text"
-                                                    id="phoneNumber"
-                                                    name="phoneNumber"
-                                                    value={phoneNumber}
-                                                    onChange={e => setPhoneNumber(e.target.value)}
-                                                    aria-invalid={
-                                                        messagesPerField.existsError("code") || messagesPerField.existsError("phoneNumber")
-                                                            ? "true"
-                                                            : "false"
-                                                    }
-                                                    className={kcClsx("kcInputClass", "kcFormSettingClass")}
-                                                    autoFocus
-                                                />
-                                                {messagesPerField.existsError("code") ||
-                                                    (messagesPerField.existsError("phoneNumber") && (
-                                                        <span id="input-error" className={kcClsx("kcInputErrorMessageClass")} aria-live="polite">
-                                                            {messagesPerField.getFirstError("phoneNumber", "code")}
-                                                        </span>
-                                                    ))}
-                                            </div>
+                        <div id="kc-form">
+                            <div id="kc-form-wrapper">
+                                {realm.password && (
+                                    <form
+                                        id="kc-form-login"
+                                        onSubmit={() => {
+                                            setIsLoginButtonDisabled(true);
+                                            return true;
+                                        }}
+                                        action={url.loginAction}
+                                        method="post"
+                                    >
+                                        <input type="hidden" id="phoneActivated" name="phoneActivated" value={phoneActivated.toString()} />
 
-                                            <div className={`${kcClsx("kcFormGroupClass")} row`}>
-                                                <div className={kcClsx("kcLabelWrapperClass")} style={{ padding: 0 }}>
-                                                    <label htmlFor="code" className={kcClsx("kcLabelClass")}>
-                                                        verificationCode
+                                        {phoneActivated ? (
+                                            <div>
+                                                <div className={kcClsx("kcFormGroupClass")}>
+                                                    <label htmlFor="phoneNumber" className={kcClsx("kcLabelClass")}>
+                                                        <DisplayText fontWeight="regular">Mobile number</DisplayText>
                                                     </label>
-                                                </div>
-                                                <div className="col-xs-8" style={{ padding: "0 5px 0 0" }}>
                                                     <input
                                                         tabIndex={0}
                                                         type="text"
-                                                        id="code"
-                                                        name="code"
-                                                        value={verificationCode}
-                                                        onChange={e => setVerificationCode(e.target.value)}
+                                                        id="phoneNumber"
+                                                        name="phoneNumber"
+                                                        value={phoneNumber}
+                                                        onChange={e => setPhoneNumber(e.target.value)}
                                                         aria-invalid={
                                                             messagesPerField.existsError("code") || messagesPerField.existsError("phoneNumber")
                                                                 ? "true"
                                                                 : "false"
                                                         }
-                                                        className={kcClsx("kcInputClass")}
-                                                        autoComplete="off"
+                                                        className={kcClsx("kcInputClass", "kcFormSettingClass")}
+                                                        autoFocus
                                                     />
-                                                    {messagesPerField.existsError("code") && (
-                                                        <span id="input-error" className={kcClsx("kcInputErrorMessageClass")} aria-live="polite">
-                                                            {messagesPerField.getFirstError("code", "phoneNumber")}
-                                                        </span>
-                                                    )}
+                                                    {messagesPerField.existsError("code") ||
+                                                        (messagesPerField.existsError("phoneNumber") && (
+                                                            <span id="input-error" className={kcClsx("kcInputErrorMessageClass")} aria-live="polite">
+                                                                {messagesPerField.getFirstError("phoneNumber", "code")}
+                                                            </span>
+                                                        ))}
                                                 </div>
-                                                <div className="col-xs-4" style={{ padding: "0 0 0 5px" }}>
-                                                    <button
-                                                        tabIndex={0}
-                                                        style={{ height: 36 }}
-                                                        className={kcClsx(
-                                                            "kcButtonClass",
-                                                            "kcButtonPrimaryClass",
-                                                            "kcButtonBlockClass",
-                                                            "kcButtonLargeClass"
+
+                                                <div className={`${kcClsx("kcFormGroupClass")} row`}>
+                                                    <div className={kcClsx("kcLabelWrapperClass")} style={{ padding: 0 }}>
+                                                        <label htmlFor="code" className={kcClsx("kcLabelClass")}>
+                                                            verificationCode
+                                                        </label>
+                                                    </div>
+                                                    <div className="col-xs-8" style={{ padding: "0 5px 0 0" }}>
+                                                        <input
+                                                            tabIndex={0}
+                                                            type="text"
+                                                            id="code"
+                                                            name="code"
+                                                            value={verificationCode}
+                                                            onChange={e => setVerificationCode(e.target.value)}
+                                                            aria-invalid={
+                                                                messagesPerField.existsError("code") || messagesPerField.existsError("phoneNumber")
+                                                                    ? "true"
+                                                                    : "false"
+                                                            }
+                                                            className={kcClsx("kcInputClass")}
+                                                            autoComplete="off"
+                                                        />
+                                                        {messagesPerField.existsError("code") && (
+                                                            <span id="input-error" className={kcClsx("kcInputErrorMessageClass")} aria-live="polite">
+                                                                {messagesPerField.getFirstError("code", "phoneNumber")}
+                                                            </span>
                                                         )}
-                                                        disabled={sendButtonText !== "Send Code"}
-                                                        onClick={handleSendVerificationCode}
-                                                    >
-                                                        {sendButtonText}
-                                                    </button>
+                                                    </div>
+                                                    <div className="col-xs-4" style={{ padding: "0 0 0 5px" }}>
+                                                        <button
+                                                            tabIndex={0}
+                                                            style={{ height: 36 }}
+                                                            className={kcClsx(
+                                                                "kcButtonClass",
+                                                                "kcButtonPrimaryClass",
+                                                                "kcButtonBlockClass",
+                                                                "kcButtonLargeClass"
+                                                            )}
+                                                            disabled={sendButtonText !== "Send Code"}
+                                                            onClick={handleSendVerificationCode}
+                                                        >
+                                                            {sendButtonText}
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ) : (
-                                        <div>
-                                            {!usernameHidden && (
+                                        ) : (
+                                            <div>
+                                                {!usernameHidden && (
+                                                    <div className={kcClsx("kcFormGroupClass")}>
+                                                        <label htmlFor="username" className={kcClsx("kcLabelClass")}>
+                                                            {!realm.loginWithEmailAllowed
+                                                                ? msg("username")
+                                                                : !realm.registrationEmailAsUsername
+                                                                  ? msg("usernameOrEmail")
+                                                                  : msg("email")}
+                                                        </label>
+                                                        <input
+                                                            tabIndex={2}
+                                                            id="username"
+                                                            className={kcClsx("kcInputClass")}
+                                                            name="username"
+                                                            defaultValue={login.username ?? ""}
+                                                            type="text"
+                                                            autoFocus
+                                                            autoComplete="username"
+                                                            aria-invalid={messagesPerField.existsError("username", "password")}
+                                                        />
+                                                        {messagesPerField.existsError("username", "password") && (
+                                                            <span id="input-error" className={kcClsx("kcInputErrorMessageClass")} aria-live="polite">
+                                                                {messagesPerField.getFirstError("username", "password")}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                )}
                                                 <div className={kcClsx("kcFormGroupClass")}>
-                                                    <label htmlFor="username" className={kcClsx("kcLabelClass")}>
-                                                        {!realm.loginWithEmailAllowed
-                                                            ? msg("username")
-                                                            : !realm.registrationEmailAsUsername
-                                                              ? msg("usernameOrEmail")
-                                                              : msg("email")}
+                                                    <label htmlFor="password" className={kcClsx("kcLabelClass")}>
+                                                        {msg("password")}
                                                     </label>
                                                     <input
-                                                        tabIndex={2}
-                                                        id="username"
+                                                        tabIndex={3}
+                                                        id="password"
                                                         className={kcClsx("kcInputClass")}
-                                                        name="username"
-                                                        defaultValue={login.username ?? ""}
-                                                        type="text"
-                                                        autoFocus
-                                                        autoComplete="username"
+                                                        name="password"
+                                                        type="password"
+                                                        autoComplete="current-password"
                                                         aria-invalid={messagesPerField.existsError("username", "password")}
                                                     />
-                                                    {messagesPerField.existsError("username", "password") && (
+                                                    {messagesPerField.existsError("password", "username") && (
                                                         <span id="input-error" className={kcClsx("kcInputErrorMessageClass")} aria-live="polite">
-                                                            {messagesPerField.getFirstError("username", "password")}
+                                                            {messagesPerField.getFirstError("password", "username")}
                                                         </span>
                                                     )}
                                                 </div>
-                                            )}
-                                            <div className={kcClsx("kcFormGroupClass")}>
-                                                <label htmlFor="password" className={kcClsx("kcLabelClass")}>
-                                                    {msg("password")}
-                                                </label>
-                                                <input
-                                                    tabIndex={3}
-                                                    id="password"
-                                                    className={kcClsx("kcInputClass")}
-                                                    name="password"
-                                                    type="password"
-                                                    autoComplete="current-password"
-                                                    aria-invalid={messagesPerField.existsError("username", "password")}
-                                                />
-                                                {messagesPerField.existsError("password", "username") && (
-                                                    <span id="input-error" className={kcClsx("kcInputErrorMessageClass")} aria-live="polite">
-                                                        {messagesPerField.getFirstError("password", "username")}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    <div className={clsx(kcClsx("kcFormGroupClass"), kcClsx("kcFormSettingClass"))}>
-                                        {!phoneActivated && (
-                                            <div className={kcClsx("kcFormOptionsWrapperClass")}>
-                                                <span>
-                                                    <a tabIndex={6} href={url.loginResetCredentialsUrl}>
-                                                        {msg("doForgotPassword")}
-                                                    </a>
-                                                </span>
                                             </div>
                                         )}
-                                    </div>
-                                    <div id="kc-form-buttons" className={kcClsx("kcFormButtonsClass")}>
-                                        <input type="hidden" id="id-hidden-input" name="hidden-input" value="" />
-                                        <input
-                                            tabIndex={7}
-                                            className={clsx(
-                                                kcClsx("kcButtonClass"),
-                                                kcClsx("kcButtonPrimaryClass"),
-                                                kcClsx("kcButtonBlockClass"),
-                                                kcClsx("kcButtonLargeClass")
+
+                                        <div className={clsx(kcClsx("kcFormGroupClass"), kcClsx("kcFormSettingClass"))}>
+                                            {!phoneActivated && (
+                                                <div className={kcClsx("kcFormOptionsWrapperClass")}>
+                                                    <span>
+                                                        <a tabIndex={6} href={url.loginResetCredentialsUrl}>
+                                                            {msg("doForgotPassword")}
+                                                        </a>
+                                                    </span>
+                                                </div>
                                             )}
-                                            name="login"
-                                            id="kc-login"
-                                            type="submit"
-                                            value={msgStr("doLogIn")}
-                                            disabled={isLoginButtonDisabled}
-                                        />
-                                    </div>
-                                </form>
-                            )}
+                                        </div>
+                                        <div id="kc-form-buttons" className={kcClsx("kcFormButtonsClass")}>
+                                            <input type="hidden" id="id-hidden-input" name="hidden-input" value="" />
+                                            <input
+                                                tabIndex={7}
+                                                className={clsx(
+                                                    kcClsx("kcButtonClass"),
+                                                    kcClsx("kcButtonPrimaryClass"),
+                                                    kcClsx("kcButtonBlockClass"),
+                                                    kcClsx("kcButtonLargeClass")
+                                                )}
+                                                name="login"
+                                                id="kc-login"
+                                                type="submit"
+                                                value={msgStr("doLogIn")}
+                                                disabled={isLoginButtonDisabled}
+                                            />
+                                        </div>
+                                    </form>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
