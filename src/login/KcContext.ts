@@ -18,6 +18,9 @@ export type KcContextExtensionPerPage = {
         };
         phoneNumber: string;
     };
+    "login.ftl": {
+        supportPhone: boolean;
+    };
 };
 
 export type KcContext = ExtendKcContext<KcContextExtension, KcContextExtensionPerPage>;

@@ -1,34 +1,19 @@
 import { useEffect } from "react";
 import type { TemplateProps } from "keycloakify/login/TemplateProps";
-import { getKcClsx } from "keycloakify/login/lib/kcClsx";
-import { useSetClassName } from "keycloakify/tools/useSetClassName";
 import { useStylesAndScripts } from "keycloakify/login/Template.useStylesAndScripts";
 import type { I18n } from "./i18n";
 import type { KcContext } from "./KcContext";
 import "@digitallabs/one-x-ui/styles.css";
 import "../styles/tailwind.css";
-import hdfcInspireLogo from "../asserts/images/HDFCLife_Inspire_Logo.svg";
+import hdfcInspireLogo from "../asserts/icons/HDFCLife_Inspire_Logo.svg";
 
 export default function Template(props: TemplateProps<KcContext, I18n>) {
-    const { documentTitle, bodyClassName, kcContext, i18n, doUseDefaultCss, classes, children } = props;
-
-    const { kcClsx } = getKcClsx({ doUseDefaultCss, classes });
-
+    const { documentTitle, kcContext, i18n, doUseDefaultCss, children } = props;
     const { msgStr } = i18n;
 
     useEffect(() => {
         document.title = documentTitle ?? msgStr("loginTitle", kcContext.realm.displayName);
-    }, []);
-
-    useSetClassName({
-        qualifiedName: "html",
-        className: kcClsx("kcHtmlClass")
-    });
-
-    useSetClassName({
-        qualifiedName: "body",
-        className: bodyClassName ?? kcClsx("kcBodyClass")
-    });
+    }, [documentTitle, kcContext.realm.displayName, msgStr]);
 
     const { isReadyToRender } = useStylesAndScripts({ kcContext, doUseDefaultCss });
 
@@ -37,11 +22,13 @@ export default function Template(props: TemplateProps<KcContext, I18n>) {
     }
 
     return (
-        <div className="bg-[#F0F6FE]">
-            <div className="pt-[80px] pl-[80px]">
-                <img className="w-[174.32px]" src={hdfcInspireLogo} alt="HDFCLife Inspire Logo" />
+        <div className="bg-[#F0F6FE] flex flex-col min-h-screen justify-center">
+            <div className="pt-4 pl-4 sm:pt-8 md:pt-[80px]  sm:pl-8 md:pl-[80px] flex justify-center lg:justify-start">
+                <img className="w-[152px] lg:w-[174px]" src={hdfcInspireLogo} alt="HDFCLife Inspire Logo" />
             </div>
-            <div className="flex items-center justify-center min-h-screen ">{children}</div>
+            <div className="flex lg:items-center mt-4 lg:mt-0 justify-center flex-1">
+                {children}
+            </div>
         </div>
     );
 }
