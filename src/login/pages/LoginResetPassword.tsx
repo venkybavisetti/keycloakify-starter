@@ -4,7 +4,7 @@ import type { PageProps } from "keycloakify/login/pages/PageProps";
 import type { KcContext } from "../KcContext";
 import { colors, TextField, Heading, Text, Button } from "@digitallabs/one-x-ui";
 import type { I18n } from "../i18n";
-import productLogoHdfcLife from "../../asserts/images/Product_Logo_HDFC_Life.svg";
+import productLogoHdfcLife from "../../asserts/icons/Product_Logo_HDFC_Life.svg";
 
 const LoginResetPassword:React.FC<PageProps<Extract<KcContext, { pageId: "login-reset-password.ftl" }>, I18n>>=({kcContext, i18n, doUseDefaultCss, Template, classes}) =>{
 

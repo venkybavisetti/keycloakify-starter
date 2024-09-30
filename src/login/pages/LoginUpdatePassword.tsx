@@ -1,11 +1,9 @@
-import { useEffect, useReducer } from "react";
-import { assert } from "keycloakify/tools/assert";
-import { getKcClsx, type KcClsx } from "keycloakify/login/lib/kcClsx";
+import { getKcClsx } from "keycloakify/login/lib/kcClsx";
 import type { PageProps } from "keycloakify/login/pages/PageProps";
-import { colors, TextField, Heading, Text, Button } from "@digitallabs/one-x-ui";
+import { colors, TextField, Heading, Button } from "@digitallabs/one-x-ui";
 import type { KcContext } from "../KcContext";
 import type { I18n } from "../i18n";
-import productLogoHdfcLife from "../../asserts/images/Product_Logo_HDFC_Life.svg";
+import productLogoHdfcLife from "../../asserts/icons/Product_Logo_HDFC_Life.svg";
 
 const LoginUpdatePassword: React.FC<PageProps<Extract<KcContext, { pageId: "login-update-password.ftl" }>, I18n>> = ({
     kcContext,
@@ -19,9 +17,8 @@ const LoginUpdatePassword: React.FC<PageProps<Extract<KcContext, { pageId: "logi
         classes
     });
 
-    const { msg, msgStr } = i18n;
 
-    const { url, messagesPerField, isAppInitiatedAction } = kcContext;
+    const { messagesPerField } = kcContext;
 
     return (
         <Template kcContext={kcContext} i18n={i18n} doUseDefaultCss={doUseDefaultCss} classes={classes} headerNode="Login">
@@ -163,44 +160,4 @@ const LoginUpdatePassword: React.FC<PageProps<Extract<KcContext, { pageId: "logi
 //     );
 // }
 
-function PasswordWrapper(props: { kcClsx: KcClsx; i18n: I18n; passwordInputId: string; children: JSX.Element }) {
-    const { kcClsx, i18n, passwordInputId, children } = props;
-
-    const { msgStr } = i18n;
-
-    const [isPasswordRevealed, toggleIsPasswordRevealed] = useReducer((isPasswordRevealed: boolean) => !isPasswordRevealed, false);
-
-    useEffect(() => {
-        const passwordInputElement = document.getElementById(passwordInputId);
-
-        assert(passwordInputElement instanceof HTMLInputElement);
-
-        passwordInputElement.type = isPasswordRevealed ? "text" : "password";
-    }, [isPasswordRevealed]);
-
-    return (
-        <div className={kcClsx("kcInputGroup")}>
-            {children}
-            {/* <button
-                type="button"
-                className={kcClsx("kcFormPasswordVisibilityButtonClass")}
-                aria-label={msgStr(isPasswordRevealed ? "hidePassword" : "showPassword")}
-                aria-controls={passwordInputId}
-                onClick={toggleIsPasswordRevealed}
-            >
-                <i className={kcClsx(isPasswordRevealed ? "kcFormPasswordVisibilityIconHide" : "kcFormPasswordVisibilityIconShow")} aria-hidden />
-            </button> */}
-
-            <Button
-                type="button"
-                // disabled={isButtondisabled}
-                fullWidth={true}
-                color="primary"
-                onClick={toggleIsPasswordRevealed}
-            >
-                Continue
-            </Button>
-        </div>
-    );
-}
 export default LoginUpdatePassword;
