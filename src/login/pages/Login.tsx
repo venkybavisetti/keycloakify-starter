@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import type { PageProps } from "keycloakify/login/pages/PageProps";
 import { getKcClsx } from "keycloakify/login/lib/kcClsx";
 import type { KcContext } from "../KcContext";
@@ -14,39 +14,77 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
         classes
     });
 
-    const { realm, url, usernameHidden, login, messagesPerField } = kcContext;
+    const {
+        realm,
+        url,
+        usernameHidden,
+        //  login,
+        messagesPerField
+    } = kcContext;
     // const { msg } = i18n;
 
     const [isLoginButtonDisabled, setIsLoginButtonDisabled] = useState(false);
     const [phoneActivated, setPhoneActivated] = useState(false);
     const [phoneNumber, setPhoneNumber] = useState("");
+    const [email, setEmail] = useState("");
     const [verificationCode, setVerificationCode] = useState("");
-    const [sendButtonText, setSendButtonText] = useState("Send Code");
+    const [isDisabledSendCode, setIsDisabledSendCode] = useState(false);
+    const [hasLoginHint, setHasLoginHint] = useState(false);
 
-    const handleSendVerificationCode = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        event.preventDefault();
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const hint = urlParams.get("login_hint");
+
+        if (!hint) {
+            return setHasLoginHint(false);
+        }
+        setHasLoginHint(true);
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const phoneRegex = /^[6-9]\d{9}$/;
+
+        if (emailRegex.test(hint)) {
+            setEmail(hint);
+            setPhoneActivated(false);
+        } else if (phoneRegex.test(hint)) {
+            setPhoneNumber(hint);
+            setPhoneActivated(true);
+            handleSendVerificationCode(hint);
+        }
+    }, []);
+
+    const handleSendVerificationCode = async (phoneNo?: string) => {
+        console.log("---------", phoneNo, phoneNumber);
+        const sendOtpPhoneNumber = `+91${phoneNo ?? phoneNumber}`;
         try {
-            setSendButtonText("Resend code");
-            const params = { params: { phoneNumber: `+91${phoneNumber}` } };
+            setIsDisabledSendCode(true);
+            const params = { params: { phoneNumber: sendOtpPhoneNumber } };
             const response = await axios.get(`http://localhost:8001/realms/${realm.name}/sms/authentication-code`, params);
-
             const expiresIn = response.data.expires_in;
+
+            //   const expiresIn = 1;
             if (expiresIn) {
-                setTimeout(() => setSendButtonText("Send Code"), expiresIn * 1000);
+                setTimeout(() => setIsDisabledSendCode(false), expiresIn * 1000);
             } else {
-                setSendButtonText("Send Code");
+                setIsDisabledSendCode(false);
             }
         } catch (error) {
             console.error("Error sending verification code", error);
-            setSendButtonText("Send Code");
+            setIsDisabledSendCode(false);
         }
+    };
+
+    const handleBackNavigation = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const loginHint = urlParams.get("login_hint");
+
+        window.location.href = "http://localhost:8080/api/auth/signin-two?login_hint=" + loginHint;
     };
 
     return (
         <Template kcContext={kcContext} i18n={i18n} doUseDefaultCss={doUseDefaultCss} classes={classes} headerNode="Login">
             <div>
                 <div className="absolute flex pt-6 pl-4 items-center gap-1">
-                    <Button variant="link" color="gray" size="sm" startIcon={<ArrowLeft size={20} />}>
+                    <Button onClick={handleBackNavigation} variant="link" color="gray" size="sm" startIcon={<ArrowLeft size={20} />}>
                         Back
                     </Button>
                 </div>
@@ -61,39 +99,51 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
                             </Heading>
                         </div>
                         <div className="gap-6 flex flex-col">
-                            <div className="flex justify-center">
-                                <div className="bg-[#FEF2F1] rounded-full max-w-fit">
-                                    {phoneActivated ? (
-                                        <>
-                                            <Button
-                                                className="rounded-full p-3"
-                                                variant="primary"
-                                                color="primary"
-                                                onClick={() => setPhoneActivated(true)}
-                                            >
-                                                Mobile number
-                                            </Button>
-                                            <Button className="rounded-full p-3" variant="link" color="gray" onClick={() => setPhoneActivated(false)}>
-                                                Username
-                                            </Button>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Button className="rounded-full p-3" variant="link" color="gray" onClick={() => setPhoneActivated(true)}>
-                                                Mobile number
-                                            </Button>
-                                            <Button
-                                                className="rounded-full p-3"
-                                                variant="primary"
-                                                color="primary"
-                                                onClick={() => setPhoneActivated(false)}
-                                            >
-                                                Username
-                                            </Button>
-                                        </>
-                                    )}
+                            {!hasLoginHint && (
+                                <div className="flex justify-center">
+                                    <div className="bg-[#FEF2F1] rounded-full max-w-fit">
+                                        {phoneActivated ? (
+                                            <>
+                                                <Button
+                                                    className="rounded-full p-3"
+                                                    variant="primary"
+                                                    color="primary"
+                                                    onClick={() => setPhoneActivated(true)}
+                                                >
+                                                    Mobile number
+                                                </Button>
+                                                <Button
+                                                    className="rounded-full p-3"
+                                                    variant="link"
+                                                    color="gray"
+                                                    onClick={() => setPhoneActivated(false)}
+                                                >
+                                                    Username
+                                                </Button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Button
+                                                    className="rounded-full p-3"
+                                                    variant="link"
+                                                    color="gray"
+                                                    onClick={() => setPhoneActivated(true)}
+                                                >
+                                                    Mobile number
+                                                </Button>
+                                                <Button
+                                                    className="rounded-full p-3"
+                                                    variant="primary"
+                                                    color="primary"
+                                                    onClick={() => setPhoneActivated(false)}
+                                                >
+                                                    Username
+                                                </Button>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                             {realm.password && (
                                 <form
@@ -107,11 +157,12 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
                                     className="flex flex-col gap-8"
                                 >
                                     <input type="hidden" id="phoneActivated" name="phoneActivated" value={phoneActivated.toString()} />
-
+                                    <input type="hidden" id="phoneNumber" name="phoneNumber" value={`+91${phoneNumber}`} />
                                     {phoneActivated ? (
                                         <div className="flex flex-col gap-6">
                                             <div>
                                                 <TextField
+                                                    readOnly={hasLoginHint}
                                                     tabIndex={0}
                                                     id="phoneNumber"
                                                     name="phoneNumber"
@@ -169,11 +220,11 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
 
                                                 <Button
                                                     variant="secondary"
-                                                    onClick={handleSendVerificationCode}
-                                                    disabled={sendButtonText !== "Send Code"}
+                                                    onClick={() => handleSendVerificationCode()}
+                                                    disabled={isDisabledSendCode}
                                                     size="lg"
                                                 >
-                                                    {sendButtonText}
+                                                    Resend
                                                 </Button>
                                             </div>
                                         </div>
@@ -183,13 +234,16 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
                                                 {!usernameHidden && (
                                                     <div>
                                                         <TextField
+                                                            readOnly={hasLoginHint}
+                                                            value={email}
+                                                            onChange={event => setEmail(event.target.value)}
                                                             label="User ID or Email"
                                                             variant="outline"
                                                             size="lg"
                                                             tabIndex={2}
                                                             id="username"
                                                             name="username"
-                                                            defaultValue={login.username ?? ""}
+                                                            // defaultValue={login.username ?? ""}
                                                             type="text"
                                                             autoFocus
                                                             autoComplete="username"
