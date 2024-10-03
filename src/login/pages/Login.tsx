@@ -39,21 +39,19 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
             return setHasLoginHint(false);
         }
         setHasLoginHint(true);
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const phoneRegex = /^[6-9]\d{9}$/;
 
-        if (emailRegex.test(hint)) {
-            setEmail(hint);
-            setPhoneActivated(false);
-        } else if (phoneRegex.test(hint)) {
+        if (phoneRegex.test(hint)) {
             setPhoneNumber(hint);
             setPhoneActivated(true);
             handleSendVerificationCode(hint);
+        } else {
+            setEmail(hint);
+            setPhoneActivated(false);
         }
     }, []);
 
     const handleSendVerificationCode = async (phoneNo?: string) => {
-        console.log("---------", phoneNo, phoneNumber);
         const sendOtpPhoneNumber = `+91${phoneNo ?? phoneNumber}`;
         try {
             setIsDisabledSendCode(true);
@@ -76,8 +74,12 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
     const handleBackNavigation = () => {
         const urlParams = new URLSearchParams(window.location.search);
         const loginHint = urlParams.get("login_hint");
+        const siginUrl = urlParams.get("sigin_uri");
 
-        window.location.href = "http://localhost:8080/api/auth/signin-two?login_hint=" + loginHint;
+        if (siginUrl && loginHint) {
+            const backNavigationUrl = `${siginUrl}?login_hint=${loginHint}`;
+            window.location.href = backNavigationUrl;
+        }
     };
 
     return (
@@ -95,7 +97,7 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
                                 <img src={productLogoHdfcLife} alt="productLogoHdfcLife" className="w-24 md:w-32" />
                             </div>
                             <Heading as="h3" fontWeight="semibold" className="text-center text-lg md:text-xl">
-                                Login using
+                                Sigin using
                             </Heading>
                         </div>
                         <div className="gap-6 flex flex-col">
@@ -160,35 +162,36 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
                                     <input type="hidden" id="phoneNumber" name="phoneNumber" value={`+91${phoneNumber}`} />
                                     {phoneActivated ? (
                                         <div className="flex flex-col gap-6">
-                                            <div>
-                                                <TextField
-                                                    readOnly={hasLoginHint}
-                                                    tabIndex={0}
-                                                    id="phoneNumber"
-                                                    name="phoneNumber"
-                                                    value={phoneNumber}
-                                                    label="Mobile number"
-                                                    variant="outline"
-                                                    onChange={e => setPhoneNumber(e.target.value)}
-                                                    type="text"
-                                                    aria-invalid={phoneNumber ? "false" : "true"}
-                                                    autoFocus
-                                                    size="lg"
-                                                    leftSection={
-                                                        <div style={{ color: colors.neutral.grey[900] }}>
-                                                            <Text fontWeight="medium" size="md">
-                                                                +91
-                                                            </Text>
-                                                        </div>
-                                                    }
-                                                />
-                                                {messagesPerField.existsError("code") ||
-                                                    (messagesPerField.existsError("phoneNumber") && (
-                                                        <span id="input-error" className={kcClsx("kcInputErrorMessageClass")} aria-live="polite">
-                                                            {messagesPerField.getFirstError("phoneNumber", "code")}
-                                                        </span>
-                                                    ))}
-                                            </div>
+                                            {!hasLoginHint ? (
+                                                <div>
+                                                    <TextField
+                                                        tabIndex={0}
+                                                        id="phoneNumber"
+                                                        name="phoneNumber"
+                                                        value={phoneNumber}
+                                                        label="Mobile number"
+                                                        variant="outline"
+                                                        onChange={e => setPhoneNumber(e.target.value)}
+                                                        type="text"
+                                                        aria-invalid={phoneNumber ? "false" : "true"}
+                                                        autoFocus
+                                                        size="lg"
+                                                        leftSection={
+                                                            <div style={{ color: colors.neutral.grey[900] }}>
+                                                                <Text fontWeight="medium" size="md">
+                                                                    +91
+                                                                </Text>
+                                                            </div>
+                                                        }
+                                                    />
+                                                    {messagesPerField.existsError("code") ||
+                                                        (messagesPerField.existsError("phoneNumber") && (
+                                                            <span id="input-error" className={kcClsx("kcInputErrorMessageClass")} aria-live="polite">
+                                                                {messagesPerField.getFirstError("phoneNumber", "code")}
+                                                            </span>
+                                                        ))}
+                                                </div>
+                                            ):<Heading as="h4" fontWeight="bold">{`+91 ${phoneNumber}`}</Heading>}
 
                                             <div className="flex items-end gap-4">
                                                 <div className="flex-1">
@@ -231,10 +234,9 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
                                     ) : (
                                         <div className="flex flex-col">
                                             <div className="flex flex-col gap-6">
-                                                {!usernameHidden && (
+                                                {!hasLoginHint ? (
                                                     <div>
                                                         <TextField
-                                                            readOnly={hasLoginHint}
                                                             value={email}
                                                             onChange={event => setEmail(event.target.value)}
                                                             label="User ID or Email"
@@ -255,6 +257,13 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
                                                             </span>
                                                         )}
                                                     </div>
+                                                ) : (
+                                                    <>
+                                                        <Heading as="h4" fontWeight="bold">
+                                                            {email}
+                                                        </Heading>
+                                                        <input type="hidden" id="username" name="username" value={email} />
+                                                    </>
                                                 )}
 
                                                 <div>
