@@ -56,10 +56,9 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
         try {
             setIsDisabledSendCode(true);
             const params = { params: { phoneNumber: sendOtpPhoneNumber } };
-            const response = await axios.get(`http://localhost:8001/realms/${realm.name}/sms/authentication-code`, params);
+            const response = await axios.get(`${window.location.origin}/realms/${realm.name}/sms/authentication-code`, params);
             const expiresIn = response.data.expires_in;
 
-            //   const expiresIn = 1;
             if (expiresIn) {
                 setTimeout(() => setIsDisabledSendCode(false), expiresIn * 1000);
             } else {
