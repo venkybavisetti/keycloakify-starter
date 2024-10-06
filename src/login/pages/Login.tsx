@@ -14,15 +14,8 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
         classes
     });
 
-    const {
-        realm,
-        url,
-        usernameHidden,
-        //  login,
-        messagesPerField
-    } = kcContext;
-    // const { msg } = i18n;
-
+    const { realm, url, login, messagesPerField, attemptedPhoneNumber, client } = kcContext;
+    const { msgStr } = i18n;
     const [isLoginButtonDisabled, setIsLoginButtonDisabled] = useState(false);
     const [phoneActivated, setPhoneActivated] = useState(false);
     const [phoneNumber, setPhoneNumber] = useState("");
@@ -30,33 +23,32 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
     const [verificationCode, setVerificationCode] = useState("");
     const [isDisabledSendCode, setIsDisabledSendCode] = useState(false);
     const [hasLoginHint, setHasLoginHint] = useState(false);
+    const [asSentMaxOtp, setSentMaxOtp] = useState(false);
 
     useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const hint = urlParams.get("login_hint");
-
-        if (!hint) {
+        const avilableFiled = login.username ?? attemptedPhoneNumber?.replace(msgStr("countryCode"), "");
+        if (!avilableFiled) {
             return setHasLoginHint(false);
         }
         setHasLoginHint(true);
         const phoneRegex = /^[6-9]\d{9}$/;
 
-        if (phoneRegex.test(hint)) {
-            setPhoneNumber(hint);
+        if (phoneRegex.test(avilableFiled)) {
+            setPhoneNumber(avilableFiled);
             setPhoneActivated(true);
-            handleSendVerificationCode(hint);
+            handleSendVerificationCode(avilableFiled);
         } else {
-            setEmail(hint);
+            setEmail(avilableFiled);
             setPhoneActivated(false);
         }
-    }, []);
+    }, [login.username, attemptedPhoneNumber]);
 
     const handleSendVerificationCode = async (phoneNo?: string) => {
-        const sendOtpPhoneNumber = `+91${phoneNo ?? phoneNumber}`;
+        const sendOtpPhoneNumber = `${msgStr("countryCode")}${phoneNo ?? phoneNumber}`;
         try {
             setIsDisabledSendCode(true);
             const params = { params: { phoneNumber: sendOtpPhoneNumber } };
-            const response = await axios.get(`${window.location.origin}/realms/${realm.name}/sms/authentication-code`, params);
+            const response = await axios.get(`/realms/${realm.name}/sms/authentication-code`, params);
             const expiresIn = response.data.expires_in;
 
             if (expiresIn) {
@@ -65,18 +57,16 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
                 setIsDisabledSendCode(false);
             }
         } catch (error) {
-            console.error("Error sending verification code", error);
-            setIsDisabledSendCode(false);
+            setSentMaxOtp(true);
+            setIsDisabledSendCode(true);
         }
     };
 
     const handleBackNavigation = () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const loginHint = urlParams.get("login_hint");
-        const siginUrl = urlParams.get("sigin_uri");
+        const avilableFiled = login.username ?? attemptedPhoneNumber?.replace(msgStr("countryCode"), "");
 
-        if (siginUrl && loginHint) {
-            const backNavigationUrl = `${siginUrl}?login_hint=${loginHint}`;
+        if (avilableFiled) {
+            const backNavigationUrl = `${client.baseUrl}/api/auth/signin-two?login_hint=${avilableFiled}`;
             window.location.href = backNavigationUrl;
         }
     };
@@ -86,7 +76,7 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
             <div>
                 <div className="absolute flex pt-6 pl-4 items-center gap-1">
                     <Button onClick={handleBackNavigation} variant="link" color="gray" size="sm" startIcon={<ArrowLeft size={20} />}>
-                        Back
+                        {msgStr("backBtn")}
                     </Button>
                 </div>
                 <div className="bg-white lg:rounded-2xl md:rounded-2xl shadow-[0px_20px_32px_0px_#6061701f] gap-8 lg:w-[680px] mx-auto p-4 sm:p-0 md:p-[80px]">
@@ -96,7 +86,7 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
                                 <img src={productLogoHdfcLife} alt="productLogoHdfcLife" className="w-24 md:w-32" />
                             </div>
                             <Heading as="h3" fontWeight="semibold" className="text-center text-lg md:text-xl">
-                                Sigin using
+                                {msgStr("hliTitle")}
                             </Heading>
                         </div>
                         <div className="gap-6 flex flex-col">
@@ -111,7 +101,7 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
                                                     color="primary"
                                                     onClick={() => setPhoneActivated(true)}
                                                 >
-                                                    Mobile number
+                                                    {msgStr("mobileBtn")}
                                                 </Button>
                                                 <Button
                                                     className="rounded-full p-3"
@@ -119,7 +109,7 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
                                                     color="gray"
                                                     onClick={() => setPhoneActivated(false)}
                                                 >
-                                                    Username
+                                                    {msgStr("usernameBtn")}
                                                 </Button>
                                             </>
                                         ) : (
@@ -130,7 +120,7 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
                                                     color="gray"
                                                     onClick={() => setPhoneActivated(true)}
                                                 >
-                                                    Mobile number
+                                                    {msgStr("mobileBtn")}
                                                 </Button>
                                                 <Button
                                                     className="rounded-full p-3"
@@ -138,7 +128,7 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
                                                     color="primary"
                                                     onClick={() => setPhoneActivated(false)}
                                                 >
-                                                    Username
+                                                    {msgStr("usernameBtn")}
                                                 </Button>
                                             </>
                                         )}
@@ -158,17 +148,17 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
                                     className="flex flex-col gap-8"
                                 >
                                     <input type="hidden" id="phoneActivated" name="phoneActivated" value={phoneActivated.toString()} />
-                                    <input type="hidden" id="phoneNumber" name="phoneNumber" value={`+91${phoneNumber}`} />
+                                    <input type="hidden" id="phoneNumber" name="phoneNumber" value={`${msgStr("countryCode")}${phoneNumber}`} />
                                     {phoneActivated ? (
                                         <div className="flex flex-col gap-6">
-                                            {!hasLoginHint ? (
-                                                <div>
+                                            <div>
+                                                {!hasLoginHint ? (
                                                     <TextField
                                                         tabIndex={0}
                                                         id="phoneNumber"
                                                         name="phoneNumber"
                                                         value={phoneNumber}
-                                                        label="Mobile number"
+                                                        label={msgStr("mobileLabel")}
                                                         variant="outline"
                                                         onChange={e => setPhoneNumber(e.target.value)}
                                                         type="text"
@@ -178,56 +168,64 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
                                                         leftSection={
                                                             <div style={{ color: colors.neutral.grey[900] }}>
                                                                 <Text fontWeight="medium" size="md">
-                                                                    +91
+                                                                    {msgStr("countryCode")}
                                                                 </Text>
                                                             </div>
                                                         }
                                                     />
-                                                    {messagesPerField.existsError("code") ||
-                                                        (messagesPerField.existsError("phoneNumber") && (
-                                                            <span id="input-error" className={kcClsx("kcInputErrorMessageClass")} aria-live="polite">
-                                                                {messagesPerField.getFirstError("phoneNumber", "code")}
-                                                            </span>
-                                                        ))}
-                                                </div>
-                                            ):<Heading as="h4" fontWeight="bold">{`+91 ${phoneNumber}`}</Heading>}
-
-                                            <div className="flex items-end gap-4">
-                                                <div className="flex-1">
-                                                    <TextField
-                                                        tabIndex={0}
-                                                        type="password"
-                                                        id="code"
-                                                        name="code"
-                                                        value={verificationCode}
-                                                        onChange={e => setVerificationCode(e.target.value)}
-                                                        autoComplete="off"
-                                                        label="Verification code"
-                                                        variant="outline"
-                                                        autoFocus
-                                                        size="lg"
-                                                        rightSection={<EyeSlash size={32} />}
-                                                        aria-invalid={
-                                                            messagesPerField.existsError("code") || messagesPerField.existsError("phoneNumber")
-                                                                ? "true"
-                                                                : "false"
-                                                        }
-                                                    />
-                                                    {messagesPerField.existsError("code") && (
+                                                ) : (
+                                                    <Heading as="h4" fontWeight="bold">{`${msgStr("countryCode")} ${phoneNumber}`}</Heading>
+                                                )}
+                                                {messagesPerField.existsError("code") ||
+                                                    (messagesPerField.existsError("phoneNumber") && (
                                                         <span id="input-error" className={kcClsx("kcInputErrorMessageClass")} aria-live="polite">
-                                                            {messagesPerField.getFirstError("code", "phoneNumber")}
+                                                            {messagesPerField.getFirstError("phoneNumber", "code")}
                                                         </span>
-                                                    )}
-                                                </div>
+                                                    ))}
+                                            </div>
+                                            <div className="flex flex-col gap-1">
+                                                <div className="flex items-end gap-4">
+                                                    <div className="flex-1">
+                                                        <TextField
+                                                            tabIndex={0}
+                                                            type="password"
+                                                            id="code"
+                                                            name="code"
+                                                            value={verificationCode}
+                                                            onChange={e => setVerificationCode(e.target.value)}
+                                                            autoComplete="off"
+                                                            label={msgStr("verificationLabel")}
+                                                            variant="outline"
+                                                            autoFocus
+                                                            size="lg"
+                                                            rightSection={<EyeSlash size={32} />}
+                                                            aria-invalid={
+                                                                messagesPerField.existsError("code") || messagesPerField.existsError("phoneNumber")
+                                                                    ? "true"
+                                                                    : "false"
+                                                            }
+                                                        />
+                                                    </div>
 
-                                                <Button
-                                                    variant="secondary"
-                                                    onClick={() => handleSendVerificationCode()}
-                                                    disabled={isDisabledSendCode}
-                                                    size="lg"
-                                                >
-                                                    Resend
-                                                </Button>
+                                                    <Button
+                                                        variant="secondary"
+                                                        onClick={() => handleSendVerificationCode()}
+                                                        disabled={isDisabledSendCode}
+                                                        size="lg"
+                                                    >
+                                                        {msgStr("resendBtn")}
+                                                    </Button>
+                                                </div>
+                                                {messagesPerField.existsError("code") && (
+                                                    <span id="input-error" className={kcClsx("kcInputErrorMessageClass")} aria-live="polite">
+                                                        {messagesPerField.getFirstError("code", "phoneNumber")}
+                                                    </span>
+                                                )}
+                                                {asSentMaxOtp && (
+                                                    <span id="input-error" className={kcClsx("kcInputErrorMessageClass")} aria-live="polite">
+                                                        {msgStr("maxOtps")}
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
                                     ) : (
@@ -238,23 +236,17 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
                                                         <TextField
                                                             value={email}
                                                             onChange={event => setEmail(event.target.value)}
-                                                            label="User ID or Email"
+                                                            label={msgStr("userLabel")}
                                                             variant="outline"
                                                             size="lg"
                                                             tabIndex={2}
                                                             id="username"
                                                             name="username"
-                                                            // defaultValue={login.username ?? ""}
                                                             type="text"
                                                             autoFocus
                                                             autoComplete="username"
                                                             aria-invalid={messagesPerField.existsError("username", "password")}
                                                         />
-                                                        {messagesPerField.existsError("username", "password") && (
-                                                            <span id="input-error" className={kcClsx("kcInputErrorMessageClass")} aria-live="polite">
-                                                                {messagesPerField.getFirstError("username", "password")}
-                                                            </span>
-                                                        )}
                                                     </div>
                                                 ) : (
                                                     <>
@@ -273,21 +265,23 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
                                                         type="password"
                                                         autoComplete="current-password"
                                                         aria-invalid={messagesPerField.existsError("username", "password")}
-                                                        label="Password"
+                                                        label={msgStr("passwordLabel")}
                                                         variant="outline"
                                                         autoFocus
                                                         size="lg"
                                                         rightSection={<EyeSlash size={32} />}
                                                     />
-                                                    {usernameHidden && messagesPerField.existsError("username", "password") && (
-                                                        <span id="input-error" className={kcClsx("kcInputErrorMessageClass")} aria-live="polite" />
+                                                    {messagesPerField.existsError("username", "password") && (
+                                                        <span id="input-error" className={kcClsx("kcInputErrorMessageClass")} aria-live="polite">
+                                                            {messagesPerField.getFirstError("username", "password")}
+                                                        </span>
                                                     )}
                                                 </div>
                                             </div>
                                             {!phoneActivated && (
                                                 <div className="flex justify-end mt-1">
                                                     <Button variant="link" color="gray" size="md">
-                                                        Forgot Password
+                                                        {msgStr("forgotBtn")}
                                                     </Button>
                                                 </div>
                                             )}
@@ -304,7 +298,7 @@ const Login: React.FC<PageProps<Extract<KcContext, { pageId: "login.ftl" }>, I18
                                         type="submit"
                                         disabled={isLoginButtonDisabled}
                                     >
-                                        Login
+                                        {msgStr("loginBtn")}
                                     </Button>
                                 </form>
                             )}

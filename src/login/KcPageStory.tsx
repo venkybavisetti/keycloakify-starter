@@ -24,7 +24,9 @@ const kcContextExtensionPerPage: KcContextExtensionPerPage = {
         phoneNumber: "+9123434334"
     },
     "login.ftl": {
-        supportPhone: true
+        supportPhone: true,
+        attemptedPhoneNumber: "+919542338406",
+        client: { baseUrl: "http://localhost/8001" }
     }
 };
 

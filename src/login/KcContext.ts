@@ -20,6 +20,8 @@ export type KcContextExtensionPerPage = {
     };
     "login.ftl": {
         supportPhone: boolean;
+        attemptedPhoneNumber: string;
+        client: { baseUrl: string };
     };
 };
 
